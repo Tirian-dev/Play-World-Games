@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Klikk-spill med shop</title>
+  <title>Klikk-spill med shop og rød blink</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,7 +25,7 @@
 </head>
 <body>
 
-  <h1>Klikker Game</h1>
+  <h1>🎮 Klikk-spill med shop</h1>
   <p>Poeng: <span id="score">0</span></p>
   <p>Penger: <span id="money">0</span> kr</p>
   <p>Poeng per klikk: <span id="clickValue">1</span></p>
@@ -57,15 +57,14 @@
       score += clickValue;
       scoreEl.textContent = score;
 
-      // sjekk om vi har nådd 100 poeng (eller neste mål)
       if (score >= nextGoal) {
-        money += 1; // få 1 krone
+        money += 1;
         nextGoal += 100;
 
         moneyEl.textContent = money;
         nextGoalEl.textContent = nextGoal;
 
-        // blink-effekt
+        // Blink-effekt ved belønning
         document.body.style.backgroundColor = "gold";
         setTimeout(() => {
           document.body.style.backgroundColor = "";
@@ -78,19 +77,25 @@
       if (money >= 5) {
         money -= 5;
         clickValue += 1;
+
         moneyEl.textContent = money;
         clickValueEl.textContent = clickValue;
 
-        // liten blink når kjøpt
+        // Blink grønt ved kjøp
         document.body.style.backgroundColor = "lightgreen";
         setTimeout(() => {
           document.body.style.backgroundColor = "";
         }, 300);
       } else {
-        alert("Ikke nok penger! Du trenger 5 kr.");
+        // Blink rødt når du ikke har nok penger
+        document.body.style.backgroundColor = "red";
+        setTimeout(() => {
+          document.body.style.backgroundColor = "";
+        }, 300);
       }
     });
   </script>
 
 </body>
 </html>
+
