@@ -2,12 +2,13 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Klikk-spill med progressive power-ups</title>
+  <title>Klikk-spill med blink-power-up</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       margin-top: 60px;
+      transition: background-color 0.3s;
     }
     button {
       font-size: 22px;
@@ -18,7 +19,7 @@
 </head>
 <body>
 
-  <h1>🎮 Klikk-spill med progressive power-ups</h1>
+  <h1>🎮 Klikk-spill med blink-power-up</h1>
   <p>Poeng: <span id="score">0</span></p>
   <p>Poeng per klikk: <span id="multiplier">1</span></p>
   <p>Neste power-up ved: <span id="nextGoal">100</span> poeng</p>
@@ -27,8 +28,8 @@
 
   <script>
     let score = 0;
-    let multiplier = 1;      // starter med 1 poeng per klikk
-    let nextGoal = 100;      // første mål for power-up
+    let multiplier = 1;
+    let nextGoal = 100;
 
     const scoreEl = document.getElementById("score");
     const multiplierEl = document.getElementById("multiplier");
@@ -39,13 +40,18 @@
       score += multiplier;
       scoreEl.textContent = score;
 
-      // sjekk om vi har nådd power-up målet
       if (score >= nextGoal) {
-        multiplier += 1;       // +1 poeng per klikk
-        nextGoal += 100;       // neste mål økes med 100
+        multiplier += 1;
+        nextGoal += 100;
+
         multiplierEl.textContent = multiplier;
         nextGoalEl.textContent = nextGoal;
-        alert("🎉 Power-up! Nå får du " + multiplier + " poeng per klikk!");
+
+        // Blink-effekt
+        document.body.style.backgroundColor = "yellow";
+        setTimeout(() => {
+          document.body.style.backgroundColor = ""; // tilbake til standard
+        }, 300); // 0.3 sekund blink
       }
     });
   </script>
