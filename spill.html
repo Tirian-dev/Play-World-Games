@@ -2,9 +2,8 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Klikk-spill med shop og kul bakgrunn</title>
+  <title>Klikk-spill med kule bobler</title>
   <style>
-    /* Generell stil */
     body {
       font-family: Arial, sans-serif;
       text-align: center;
@@ -12,17 +11,9 @@
       padding: 0;
       min-height: 100vh;
       overflow: hidden;
-      transition: background-color 0.3s;
-      background: linear-gradient(120deg, #1e3c72, #2a5298);
-      background-size: 400% 400%;
-      animation: gradientMove 15s ease infinite;
       color: white;
-    }
-
-    @keyframes gradientMove {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
+      background: #1e1e2f;
+      position: relative;
     }
 
     /* Knappstil */
@@ -48,11 +39,26 @@
       border-top: 1px solid rgba(255,255,255,0.5);
       padding-top: 20px;
     }
+
+    /* Boble-stil */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      pointer-events: none;
+      animation: floatBubble linear infinite;
+    }
+
+    @keyframes floatBubble {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 0.7;}
+      50% { opacity: 1;}
+      100% { transform: translateY(-10vh) scale(1); opacity: 0;}
+    }
   </style>
 </head>
 <body>
 
-  <h1>🎮 Klikk-spill med shop</h1>
+  <h1>🎮 Klikk-spill med kule bobler</h1>
   <p>Poeng: <span id="score">0</span></p>
   <p>Penger: <span id="money">0</span> kr</p>
   <p>Poeng per klikk: <span id="clickValue">1</span></p>
@@ -121,9 +127,33 @@
         }, 300);
       }
     });
+
+    // Funksjon for å lage bobler
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+
+      // tilfeldig størrelse og posisjon
+      const size = Math.random() * 30 + 10; // 10px - 40px
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      bubble.style.left = `${Math.random() * 100}vw`;
+
+      // tilfeldig animasjonstid
+      bubble.style.animationDuration = `${Math.random() * 10 + 5}s`;
+
+      document.body.appendChild(bubble);
+
+      // fjern boblen etter animasjon
+      setTimeout(() => {
+        bubble.remove();
+      }, (parseFloat(bubble.style.animationDuration) * 1000));
+    }
+
+    // Lag bobler kontinuerlig
+    setInterval(createBubble, 300);
   </script>
 
 </body>
 </html>
-
 
