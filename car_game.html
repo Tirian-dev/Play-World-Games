@@ -1,0 +1,135 @@
+import pygame
+import random
+
+# Initialiser Pygame
+pygame.init()
+
+# Skjermstørrelse
+screen_width = 800
+screen_height = 600
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Bilspill")
+
+# Farger
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+
+# Bilinnstillinger
+car_width = 50
+car_height = 100
+car_x = screen_width // 2 - car_width // 2
+car_y = screen_height - car_height - 10
+car_speed = 10
+
+# Veiinnstillinger
+road_width = screen_width // 2
+road_x = screen_width // 4
+road_y = 0
+road_speed = 5
+
+# Spill variabler
+score = 0
+font = pygame.font.SysFont("Arial", 30)
+clock = pygame.time.Clock()
+
+# Bilens bilde
+car_img = pygame.Surface((car_width, car_height))
+car_img.fill(blue)
+
+# Hopp funksjon
+def jump():
+    global car_y
+    original_y = car_y
+    jump_height = 150
+    for i in range(15):
+        car_y -= jump_height // 15
+        redraw_game_window()
+        pygame.time.delay(10)
+    for i in range(15):
+        car_y += jump_height // 15
+        redraw_game_window()
+        pygame.time.delay(10)
+
+# Tegn veien og bilen
+def redraw_game_window():
+    screen.fill(white)
+
+    # Tegn vei
+    pygame.draw.rect(screen, black, (road_x, road_y, road_width, screen_height))
+
+    # Tegn bil
+    screen.blit(car_img, (car_x, car_y))
+
+    # Tegn avstandsbar
+    score_text = font.render(f"Kjørt: {score} meter", True, black)
+    screen.blit(score_text, (10, 10))
+
+    pygame.display.update()
+
+# Hovedspill funksjon
+def game_loop():
+    global car_x, car_y, score
+    car_x = screen_width // 2 - car_width // 2
+    car_y = screen_height - car_height - 10
+    score = 0
+
+    game_over = False
+    road_y = 0
+    obstacle_y = -200
+    obstacle_x = random.randint(road_x, road_x + road_width - 50)
+
+    while not game_over:
+        clock.tick(60)
+        score += 1
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    jump()
+
+        # Flytt vei og hindringer
+        road_y += road_speed
+        if road_y >= screen_height:
+            road_y = 0
+
+        obstacle_y += 5
+        if obstacle_y > screen_height:
+            obstacle_y = -200
+            obstacle_x = random.randint(road_x, road_x + road_width - 50)
+
+        # Sjekk om bil treffer hindring
+        if car_y + car_height > obstacle_y and car_y < obstacle_y + 50:
+            if car_x + car_width > obstacle_x and car_x < obstacle_x + 50:
+                game_over = True
+
+        # Beveg bilen
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and car_x > road_x:
+            car_x -= car_speed
+        if keys[pygame.K_RIGHT] and car_x < road_x + road_width - car_width:
+            car_x += car_speed
+
+        # Tegn spillet
+        redraw_game_window()
+
+        # Tegn hindring
+        pygame.draw.rect(screen, red, (obstacle_x, obstacle_y, 50, 50))
+
+        if game_over:
+            # Game Over skjerm
+            game_over_text = font.render("Game Over", True, red)
+            screen.blit(game_over_text, (screen_width // 2 - 100, screen_height // 2))
+            pygame.display.update()
+            pygame.time.delay(2000)
+
+# Start spillet
+game_loop()
+
+# Avslutt Pygame
+pygame.quit()
+quit()
