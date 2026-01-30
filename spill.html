@@ -74,6 +74,14 @@
       0% { transform: translateY(0) scale(0.5); opacity: 1; }
       100% { transform: translateY(-80vh) scale(1); opacity: 0; }
     }
+
+    #winner-message {
+      font-size: 24px;
+      color: #FFD700;
+      font-weight: bold;
+      margin-top: 20px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -83,7 +91,7 @@
   <p>Money: <span id="money">0</span> coins</p>
   <p>Points per click: <span id="clickValue">1</span></p>
   <p>Next reward at: <span id="nextGoal">100</span> points</p>
-  <p>Rebirth available at: <span id="rebirthGoal">100000</span> points</p>
+  <p>Rebirth available at: <span id="rebirthGoal">100000000</span> points</p>
 
   <button id="clickBtn">Click me!</button>
 
@@ -96,12 +104,14 @@
     <button id="rebirthBtn">Rebirth: Reset & Double points per click</button>
   </div>
 
+  <div id="winner-message">🎉 YOU HAVE COMPLETED THE GAME! 🎉</div>
+
   <script>
     let score = 0;
     let money = 0;
     let clickValue = 1;
     let nextGoal = 100;
-    let rebirthGoal = 100000;
+    let rebirthGoal = 100000000;  // Keep rebirth goal for future purposes, but not the main goal
     let rebirthMultiplier = 2;
     let shopCost = 5;
     let rebirthCount = 0;
@@ -115,6 +125,7 @@
     const clickBtn = document.getElementById("clickBtn");
     const buyClick = document.getElementById("buyClick");
     const rebirthBtn = document.getElementById("rebirthBtn");
+    const winnerMessage = document.getElementById("winner-message");
 
     function createBubble(text = "", type = "") {
       const bubble = document.createElement('div');
@@ -149,6 +160,13 @@
         nextGoalEl.textContent = nextGoal;
 
         createBubble(`${shopCost} coins`, 'shop');
+      }
+
+      // Check if the player has reached the main goal of 100 million points
+      if (score >= 100000000) {
+        winnerMessage.style.display = "block";
+        clickBtn.disabled = true;  // Disable clicking after the goal is reached
+        rebirthBtn.disabled = true;  // Disable rebirth after the goal is reached
       }
 
       updateRebirthBtn();
