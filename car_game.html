@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilspill med Bedre Grafikk</title>
+    <title>Bilspill med Uendelig Vei</title>
     <style>
         body {
             margin: 0;
@@ -11,146 +11,383 @@
         }
         canvas {
             display: block;
+            background-color: #cccccc;
+        }
+
+        /* Modal style */
+        #controlsModal {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        #modalContent {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        #modalContent h2 {
+            margin-top: 0;
+        }
+
+        #closeBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #closeBtn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Pause menu style */
+        #pauseMenu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        #pauseMenu h2 {
+            margin-top: 0;
+            font-size: 40px;
+        }
+
+        #pauseMenu button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #pauseMenu button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Kontroller - pause meny */
+        .controls {
+            margin-top: 30px;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
 
+<!-- Modal for controls -->
+<div id="controlsModal">
+    <div id="modalContent">
+        <h2>Kontroller</h2>
+        <p>Bruk "A" for å bevege bilen til venstre</p>
+        <p>Bruk "D" for å bevege bilen til høyre</p>
+        <p>Trykk Space for å starte på nytt</p>
+        <button id="closeBtn">Lukk</button>
+    </div>
+</div>
+
+<!-- Pause Menu -->
+<div id="pauseMenu">
+    <h2>Spillet er pausert</h2>
+    <button id="resumeBtn">Fortsett</button>
+    <div class="controls">
+        <h3>Kontroller:</h3>
+        <p>Bruk "A" for å bevege bilen til venstre</p>
+        <p>Bruk "D" for å bevege bilen til høyre</p>
+        <p>Trykk "Esc" for å pause spillet</p>
+        <p>Trykk Space for å starte på nytt</p>
+    </div>
+</div>
+
 <canvas id="gameCanvas"></canvas>
 
 <script>
-    // Konfigurasjon
+    // Initialiser canvas
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    canvas.width = 800;
-    canvas.height = 600;
+    // Sett canvas størrelse
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    // Farger
-    const white = "#FFFFFF";
-    const black = "#000000";
-    const red = "#FF0000";
+    // Spillvariabler
+    let carX = canvas.width / 2 - 25;
+    let carY = canvas.height - 220;
+    const carWidth = 200;
+    const carHeight = 200;
+    const carSpeed = 10;
 
-    // Bilder
-    const carImg = new Image();
-    const roadImg = new Image();
-    const obstacleImg = new Image();
+    let roadY = 0;
+    let roadSpeed = 5;
+
+    let isGameStarted = false;
+    let isGameOver = false;
+    let isGamePaused = false;
+
+    // Poengsystem for mynter
+    let coins = []; // Array for mynter
+    let collectedCoins = 0; // Teller antall mynter
 
     // Last inn bilder
-    carImg.src = 'https://example.com/car.png'; // Sett inn bilbilde-URL
-    roadImg.src = 'https://example.com/road.png'; // Sett inn vei-bilde-URL
-    obstacleImg.src = 'https://example.com/crack.png'; // Sett inn sprekkbilde-URL
+    const carImg = new Image();
+    carImg.src = 'caring.png'; // Bilbilde
 
-    // Spillinnstillinger
-    let carX = canvas.width / 2 - 50;
-    let carY = canvas.height - 120;
-    const carSpeed = 5;
-    let score = 0;
-    let isJumping = false;
-    let jumpHeight = 0;
+    const roadImg = new Image();
+    roadImg.src = 'road.avif'; // Veibilde
 
-    // Hindringer
-    let obstacleY = -200;
-    let obstacleX = Math.random() * (canvas.width / 2) + (canvas.width / 4);
-    const obstacleWidth = 50;
-    const obstacleHeight = 50;
+    const crackImg = new Image();
+    crackImg.src = 'crack.png'; // Hindringsbilde
 
-    // Hopp funksjon
-    function jump() {
-        if (!isJumping) {
-            isJumping = true;
-            let jumpUp = setInterval(() => {
-                if (jumpHeight < 150) {
-                    carY -= 10;
-                    jumpHeight += 10;
-                } else {
-                    clearInterval(jumpUp);
-                    let jumpDown = setInterval(() => {
-                        if (jumpHeight > 0) {
-                            carY += 10;
-                            jumpHeight -= 10;
-                        } else {
-                            clearInterval(jumpDown);
-                            isJumping = false;
-                        }
-                    }, 20);
-                }
-            }, 20);
-        }
+    const coinImg = new Image();
+    coinImg.src = 'coin.png'; // Myntbilde
+
+    let obstacles = [];
+
+    function createObstacle() {
+        const obstacleX = Math.random() * (canvas.width - 100); // Plasser hindringen tilfeldig på X
+        obstacles.push({ x: obstacleX, y: -100, width: 100, height: 100 }); // Hindringens posisjon og størrelse
     }
 
-    // Tegn bakgrunn og spillinnhold
-    function redrawGameWindow() {
-        // Tegn bakgrunn
-        ctx.drawImage(roadImg, 0, 0, canvas.width, canvas.height);
-
-        // Tegn bil
-        ctx.drawImage(carImg, carX, carY, 50, 100);
-
-        // Tegn hindring
-        ctx.drawImage(obstacleImg, obstacleX, obstacleY, obstacleWidth, obstacleHeight);
-
-        // Tegn score
-        ctx.fillStyle = black;
-        ctx.font = "30px Arial";
-        ctx.fillText("Kjørt: " + score + " meter", 10, 30);
-
-        requestAnimationFrame(redrawGameWindow);
+    function createCoin() {
+        const coinX = Math.random() * (canvas.width - 50); // Plasser mynten tilfeldig på X
+        coins.push({ x: coinX, y: -50, width: 50, height: 50 }); // Myntens posisjon og størrelse
     }
 
-    // Hovedspill funksjon
-    function gameLoop() {
-        score++;
+    function updateObstacles() {
+        for (let i = 0; i < obstacles.length; i++) {
+            const obstacle = obstacles[i];
+            obstacle.y += roadSpeed;
 
-        // Oppdatering av hindringer
-        obstacleY += 5;
-        if (obstacleY > canvas.height) {
-            obstacleY = -200;
-            obstacleX = Math.random() * (canvas.width / 2) + (canvas.width / 4);
-        }
-
-        // Sjekk om bilen treffer hindringen
-        if (carY + 100 > obstacleY && carY < obstacleY + obstacleHeight) {
-            if (carX + 50 > obstacleX && carX < obstacleX + obstacleWidth) {
-                gameOver();
+            // Hvis hindringen er ute av skjermen, fjern den
+            if (obstacle.y > canvas.height) {
+                obstacles.splice(i, 1);
+                i--;
             }
         }
+    }
 
-        // Bevegelse av bilen
-        document.onkeydown = function (e) {
-            if (e.key === "a" && carX > canvas.width / 4) {
-                carX -= carSpeed;
-            } else if (e.key === "d" && carX < canvas.width / 2 - 50) {
-                carX += carSpeed;
-            } else if (e.key === " " && !isJumping) {
-                jump();
+    function updateCoins() {
+        for (let i = 0; i < coins.length; i++) {
+            const coin = coins[i];
+            coin.y += roadSpeed; // Myntene faller nedover
+
+            // Hvis mynten er ute av skjermen, fjern den
+            if (coin.y > canvas.height) {
+                coins.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
+    function drawObstacles() {
+        for (let i = 0; i < obstacles.length; i++) {
+            const obstacle = obstacles[i];
+            ctx.drawImage(crackImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height); // Tegn hindringen
+        }
+    }
+
+    function drawCoins() {
+        for (let i = 0; i < coins.length; i++) {
+            const coin = coins[i];
+            ctx.drawImage(coinImg, coin.x, coin.y, coin.width, coin.height); // Tegn myntene
+        }
+    }
+
+    function checkCollision() {
+        const carHitbox = {
+            x: carX + 25,
+            y: carY + 50,
+            width: 150,
+            height: 150
+        };
+
+        for (let i = 0; i < obstacles.length; i++) {
+            const obstacle = obstacles[i];
+
+            // Sjekk om bilen treffer hindringen
+            if (
+                carHitbox.x < obstacle.x + obstacle.width &&
+                carHitbox.x + carHitbox.width > obstacle.x &&
+                carHitbox.y < obstacle.y + obstacle.height &&
+                carHitbox.y + carHitbox.height > obstacle.y
+            ) {
+                isGameOver = true; // Sett spillet til "Game Over"
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkCoinCollection() {
+        const carHitbox = {
+            x: carX + 25,
+            y: carY + 50,
+            width: 150,
+            height: 150
+        };
+
+        for (let i = 0; i < coins.length; i++) {
+            const coin = coins[i];
+
+            // Sjekk om bilen treffer mynten
+            if (
+                carHitbox.x < coin.x + coin.width &&
+                carHitbox.x + carHitbox.width > coin.x &&
+                carHitbox.y < coin.y + coin.height &&
+                carHitbox.y + carHitbox.height > coin.y
+            ) {
+                collectedCoins++; // Øk antallet mynter
+                coins.splice(i, 1); // Fjern mynten fra skjermen
+                i--;
+            }
+        }
+    }
+
+    // Funksjon for å starte spillet
+    function startGame() {
+        isGameStarted = true;
+        isGameOver = false;
+        isGamePaused = false;
+        carX = canvas.width / 2 - 25;
+        carY = canvas.height - 220;
+        roadY = 0;
+        obstacles = [];
+        
+        // Lag hindringer og mynter med jevne mellomrom
+        setInterval(createObstacle, 2000); // Lag en hindring hvert 2. sekund
+        setInterval(createCoin, 3000); // Lag en mynt hvert 3. sekund
+        
+        gameLoop();
+    }
+
+    // Spill loop
+    function gameLoop() {
+        if (isGamePaused) {
+            requestAnimationFrame(gameLoop);
+            return; // Hvis spillet er på pause, stopp videre oppdateringer
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Rens skjermen
+
+        if (isGameOver) {
+            ctx.fillStyle = "#000000";
+            ctx.font = "50px Arial";
+            ctx.fillText("GAME OVER", canvas.width / 2 - 150, canvas.height / 2 - 50);
+            ctx.font = "30px Arial";
+            ctx.fillText("Trykk Space for å starte på nytt", canvas.width / 2 - 170, canvas.height / 2 + 50);
+            return;
+        }
+
+        ctx.drawImage(roadImg, 0, roadY, canvas.width, canvas.height); // Første vei
+        ctx.drawImage(roadImg, 0, roadY - canvas.height, canvas.width, canvas.height); // Andre vei
+
+        roadY += roadSpeed;
+        if (roadY >= canvas.height) {
+            roadY = 0; // Sett veien tilbake til toppen
+        }
+
+        ctx.save();
+        ctx.scale(-1, 1); // Speil horisontalt
+        ctx.drawImage(carImg, -carX - carWidth, carY, carWidth, carHeight);
+        ctx.restore();
+
+        // Beveg bilen ved å bruke tastene
+        document.onkeydown = function(e) {
+            if (e.key === "a" && carX > 0) {
+                carX -= carSpeed; // Flytt bilen til venstre
+            } else if (e.key === "d" && carX < canvas.width - carWidth) {
+                carX += carSpeed; // Flytt bilen til høyre
             }
         };
 
-        redrawGameWindow();
+        // Oppdater og tegn hindringer og mynter
+        updateObstacles();
+        drawObstacles();
+        updateCoins();
+        drawCoins();
+
+        // Sjekk om vi har samlet mynter
+        checkCoinCollection();
+
+        // Vis antall mynter i baren
+        drawCoinBar();
+
+        if (checkCollision()) {
+            isGameOver = true;
+        }
+
+        requestAnimationFrame(gameLoop); // Kjører neste animasjon
     }
 
-    // Game Over funksjon
-    function gameOver() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = red;
-        ctx.font = "50px Arial";
-        ctx.fillText("Game Over", canvas.width / 2 - 130, canvas.height / 2);
-        setTimeout(() => {
-            score = 0;
-            carY = canvas.height - 120;
-            gameLoop(); // Start nytt spill
-        }, 2000);
-    }
+    // Lytt etter Space-tasten for å starte spillet eller starte på nytt
+    document.addEventListener("keydown", function (e) {
+        if (e.key === " " && !isGameStarted) {
+            startGame(); // Start spillet etter å ha lukket kontrollene
+            document.getElementById("controlsModal").style.display = "none"; // Skjuler modal
+        } else if (e.key === " " && isGameOver) {
+            startGame(); // Start på nytt etter game over
+        } else if (e.key === "Escape") {
+            togglePauseMenu(); // Pauser eller gjenopptar spillet
+        }
+    });
 
-    // Vent på at bildene skal lastes før spillet starter
-    carImg.onload = function() {
-        roadImg.onload = function() {
-            obstacleImg.onload = function() {
-                gameLoop();
-            }
+    // Funksjon for å vise/hide pause-menyen
+    function togglePauseMenu() {
+        if (isGamePaused) {
+            isGamePaused = false;
+            document.getElementById("pauseMenu").style.display = "none";
+        } else {
+            isGamePaused = true;
+            document.getElementById("pauseMenu").style.display = "block";
         }
     }
+
+    // Resumer spillet når brukeren trykker "Fortsett"
+    document.getElementById("resumeBtn").addEventListener("click", function () {
+        togglePauseMenu(); // Gjenoppta spillet
+    });
+
+    // Lukk kontrollmodalen når knappen trykkes
+    document.getElementById("closeBtn").addEventListener("click", function() {
+        document.getElementById("controlsModal").style.display = "none";  // Lukk modal
+    });
+
+    // Funksjon for å tegne myntbaren
+    function drawCoinBar() {
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(canvas.width - 200, 10, 180, 30);
+
+        ctx.fillStyle = "#FFFF00"; // Gullfarge
+        ctx.fillRect(canvas.width - 200, 10, 180 * (collectedCoins / 100), 30); // Baren fylles basert på antall mynter
+
+        ctx.fillStyle = "#FFFFFF"; // Hvit tekst
+        ctx.font = "20px Arial";
+        ctx.fillText("Mynter: " + collectedCoins, canvas.width - 180, 30);
+    }
+
 </script>
 
 </body>
