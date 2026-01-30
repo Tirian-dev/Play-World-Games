@@ -1,45 +1,78 @@
-<style>
-a {
-    text-decoration: none;
-    margin: 20px;
-    border-radius:40px;
-    overflow: hidden;
-    box-shadow: #11223340 4px 8px 20px 10px;
-    transition: all 0.25s linear;
-    display: inline-block;
-}
-a:hover { 
-    box-shadow: #11223380 8px 16px 40px 20px;
-    transform: scale(1.05);
-}
-img {
-    width: 300px;
-    height: auto;
+<!doctype html>
+<html lang="no">
+    <head>
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <script type="module">
+            import NXTL from "https://cdn.nxtl.ai/nxtl.es.js";
+            import dreamcatcher from "https://cdn.nxtl.ai/nxtlDreamcatcherWidget.es.js";
 
-} 
-span {
-    opacity: 0;
-    font-family: sans-serif;
-    font-weight: bold;
-    color: #334455;
-    font-size: 15px;
-    line-height: 40px;
-    margin-top: -40px;
-    display: block;
-    text-align: center;
-    transition: all 0.25s linear;
-}
-a:hover span { 
-    opacity: 1;
-}
-</style>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span>CLICKER GAME</span></a>
-<a href="car_game.html"><img src="car.jpg" /><span>CAR JUMP</span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
-<a href="spill.html"><img src="clicker_photo.jpg" /><span></span></a>
+            window.nxtl = await new NXTL({
+                proxy: "https://faas-ams3-2a2df116.doserverless.co/api/v1/web/fn-3b119ddd-26a6-4e0a-b2dd-312a8af0555a/default/proxy",
+                projectId: "sd7zyzte",
+                language: "norwegian",
+            });
+            window.nxtl.auto = false;
+            dreamcatcher();
+        </script>
+        <style>
+            .menu {
+                a {
+                    text-decoration: none;
+                    margin: 20px;
+                    border-radius: 40px;
+                    overflow: hidden;
+                    box-shadow: #11223340 4px 8px 20px 10px;
+                    transition: all 0.25s linear;
+                    display: inline-flex;
+                    flex-direction: column;
+                }
+                a:hover {
+                    box-shadow: #11223380 8px 16px 40px 20px;
+                    transform: scale(1.05);
+                }
+                img {
+                    width: 300px;
+                    height: auto;
+                }
+                span {
+                    opacity: 0;
+                    font-family: sans-serif;
+                    font-weight: bold;
+                    color: #334455;
+                    font-size: 15px;
+                    line-height: 40px;
+                    margin-top: -40px;
+                    display: block;
+                    text-align: center;
+                    transition: all 0.25s linear;
+                }
+                a:hover span {
+                    opacity: 1;
+                }
+            }
+        </style>
+        <div class="menu">
+            <a href="spill.html"
+                ><img src="clicker_photo.jpg" /><span>CLICKER GAME</span></a
+            >
+            <a href="car_game.html"
+                ><img src="car.jpg" /><span>CAR JUMP</span></a
+            >
+        </div>
+        <nxtl-dreamcatcher
+            mode="modal"
+            talk="Snakk med nettsiden"
+            info="Få informasjon tilpasset deg"
+            longhello="Hei! Hvordan kan vi hjelpe deg?"
+            shorthello="Få hjelp med å velge et spill"
+            suggestions="Forslag"
+            newsuggestions="Nye forslag"
+            inputplaceholder="Skriv din melding her"
+            customized="Tilpasset for deg"
+            sources="Kilder"
+            accent="darkorchid"
+        ></nxtl-dreamcatcher>
+    </body>
+</html>
