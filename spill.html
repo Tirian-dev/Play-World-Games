@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Klikk-spill med power-up</title>
+  <title>Klikk-spill med små power-ups</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -18,7 +18,7 @@
 </head>
 <body>
 
-  <h1>🎮 Klikk-spill med power-up</h1>
+  <h1>🎮 Klikk-spill med små power-ups</h1>
   <p>Poeng: <span id="score">0</span></p>
   <p>Poeng per klikk: <span id="multiplier">1</span></p>
 
@@ -26,21 +26,21 @@
 
   <script>
     let score = 0;
-    let multiplier = 1;
+    let multiplier = 1; // starter med 1 poeng per klikk
 
     const scoreEl = document.getElementById("score");
     const multiplierEl = document.getElementById("multiplier");
     const btn = document.getElementById("btn");
 
     btn.addEventListener("click", function() {
-      score += multiplier; // legg til poeng basert på multiplier
+      score += multiplier; // legg til poeng
       scoreEl.textContent = score;
 
-      // hver gang vi passerer 100, dobler vi multiplier
-      if (score >= 100 * multiplier) {
-        multiplier *= 2;
+      // hver 100 poeng legger vi til 1 ekstra poeng per klikk
+      if (score >= multiplier * 100) {
+        multiplier += 1; 
         multiplierEl.textContent = multiplier;
-        alert("🎉 Power-up! Poengene per klikk er nå " + multiplier);
+        alert("🎉 Power-up! Nå får du " + multiplier + " poeng per klikk!");
       }
     });
   </script>
