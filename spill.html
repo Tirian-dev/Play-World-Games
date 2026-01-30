@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Klikk-spill med bobler fra bunnen</title>
+  <title>Klikk-spill med rebirth</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -39,10 +39,9 @@
       padding-top: 20px;
     }
 
-    /* Boble-stil */
     .bubble {
       position: absolute;
-      bottom: 0; /* start nederst i skjermen */
+      bottom: 0;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.4);
       pointer-events: none;
@@ -57,7 +56,7 @@
 </head>
 <body>
 
-  <h1>🎮 Klikk-spill med bobler</h1>
+  <h1>🎮 Klikk-spill med rebirth</h1>
   <p>Poeng: <span id="score">0</span></p>
   <p>Penger: <span id="money">0</span> kr</p>
   <p>Poeng per klikk: <span id="clickValue">1</span></p>
@@ -69,6 +68,8 @@
     <h2>🛒 Shop</h2>
     <p>Kjøp +1 poeng per klikk for 5 kr</p>
     <button id="buyClick">Kjøp +1 poeng/klikk</button>
+    <p style="margin-top:20px; font-weight:bold; color: #ffcc00;">🔥 Rebirth 🔥</p>
+    <button id="rebirthBtn">Rebirth: Reset & Dobbel poeng per klikk</button>
   </div>
 
   <script>
@@ -83,6 +84,7 @@
     const nextGoalEl = document.getElementById("nextGoal");
     const clickBtn = document.getElementById("clickBtn");
     const buyClick = document.getElementById("buyClick");
+    const rebirthBtn = document.getElementById("rebirthBtn");
 
     // Funksjon for å lage en boble
     function createBubble() {
@@ -99,7 +101,6 @@
 
       document.body.appendChild(bubble);
 
-      // Fjern boblen etter animasjon
       setTimeout(() => {
         bubble.remove();
       }, duration * 1000);
@@ -110,9 +111,8 @@
       score += clickValue;
       scoreEl.textContent = score;
 
-      createBubble(); // lag en boble ved hvert klikk
+      createBubble();
 
-      // Fjern gul blink, vi gjør ingenting ved belønning nå
       if (score >= nextGoal) {
         money += 1;
         nextGoal += 100;
@@ -131,18 +131,38 @@
         moneyEl.textContent = money;
         clickValueEl.textContent = clickValue;
 
-        // blink grønt ved kjøp
         document.body.style.backgroundColor = "lightgreen";
         setTimeout(() => {
           document.body.style.backgroundColor = "";
         }, 300);
       } else {
-        // blink rødt når du ikke har nok penger
         document.body.style.backgroundColor = "red";
         setTimeout(() => {
           document.body.style.backgroundColor = "";
         }, 300);
       }
+    });
+
+    // Rebirth-knapp
+    rebirthBtn.addEventListener("click", function() {
+      // Dobler poeng per klikk
+      clickValue *= 2;
+
+      // Reset alt annet
+      score = 0;
+      money = 0;
+      nextGoal = 100;
+
+      scoreEl.textContent = score;
+      moneyEl.textContent = money;
+      clickValueEl.textContent = clickValue;
+      nextGoalEl.textContent = nextGoal;
+
+      // Blink effekt for å markere rebirth
+      document.body.style.backgroundColor = "purple";
+      setTimeout(() => {
+        document.body.style.backgroundColor = "";
+      }, 400);
     });
   </script>
 
