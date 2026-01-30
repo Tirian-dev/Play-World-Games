@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Klikk-spill med kule bobler</title>
+  <title>Click Game with Cool Bubbles</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -52,7 +52,7 @@
       align-items: center;
       pointer-events: none;
       animation: floatBubble linear forwards;
-      z-index: -1; /* Setter boblene bak teksten */
+      z-index: -1; /* Makes bubbles appear behind text */
     }
 
     .bubble.money {
@@ -78,21 +78,21 @@
 </head>
 <body>
 
-  <h1>🎮 Klikk-spill med kule bobler</h1>
-  <p>Poeng: <span id="score">0</span></p>
-  <p>Penger: <span id="money">0</span> kr</p>
-  <p>Poeng per klikk: <span id="clickValue">1</span></p>
-  <p>Neste belønning ved: <span id="nextGoal">100</span> poeng</p>
-  <p>Rebirth klar ved: <span id="rebirthGoal">100000</span> poeng</p>
-  <p>Shop pris: <span id="shopCost">5</span> kr per oppgradering</p>
+  <h1>🎮 Clicker Game</h1>
+  <p>Score: <span id="score">0</span></p>
+  <p>Money: <span id="money">0</span> coins</p>
+  <p>Points per click: <span id="clickValue">1</span></p>
+  <p>Next reward at: <span id="nextGoal">100</span> points</p>
+  <p>Rebirth available at: <span id="rebirthGoal">100000</span> points</p>
+  <p>Shop cost: <span id="shopCost">5</span> coins per upgrade</p>
 
-  <button id="clickBtn">Klikk meg!</button>
+  <button id="clickBtn">Click me!</button>
 
   <div id="shop">
     <h2>🛒 Shop</h2>
-    <button id="buyClick">Kjøp +1 poeng/klikk</button>
+    <button id="buyClick">Buy +1 points/click</button>
     <p style="margin-top:20px; font-weight:bold; color: #ffcc00;">🔥 Rebirth 🔥</p>
-    <button id="rebirthBtn">Rebirth: Reset & Dobbel poeng per klikk</button>
+    <button id="rebirthBtn">Rebirth: Reset & Double points per click</button>
   </div>
 
   <script>
@@ -147,7 +147,7 @@
         moneyEl.textContent = money;
         nextGoalEl.textContent = nextGoal;
 
-        createBubble(`${shopCost} kr`, 'shop');
+        createBubble(`${shopCost} coins`, 'shop');
       }
 
       updateRebirthBtn();
@@ -161,7 +161,7 @@
         moneyEl.textContent = money;
         clickValueEl.textContent = clickValue;
 
-        createBubble(`+1 klikk`, 'shop');
+        createBubble(`+1 click`, 'shop');
         document.body.style.backgroundColor = "lightgreen";
         setTimeout(() => { document.body.style.backgroundColor = ""; }, 300);
       } else {
@@ -172,34 +172,34 @@
 
     rebirthBtn.addEventListener("click", function() {
       if (score >= rebirthGoal) {
-        // Reset alt
+        // Reset everything
         score = 0;
         money = 0;
         nextGoal = 100;
 
-        // Dobler clickValue
+        // Double clickValue
         clickValue = 1 * Math.pow(rebirthMultiplier, rebirthCount + 1);
 
-        // **Legg til +1 i click shop etter rebirth**
+        // Add +1 to click shop after rebirth
         clickValue += 1;
 
         rebirthCount++;
 
-        // Øk rebirth mål
+        // Increase rebirth goal
         rebirthGoal = Math.floor(rebirthGoal * 1.5);
         rebirthGoalEl.textContent = rebirthGoal;
 
-        // Shop-pris alltid 5 etter rebirth
+        // Shop cost is always 5 after rebirth
         shopCost = 5;
         shopCostEl.textContent = shopCost;
 
-        // Oppdater UI
+        // Update UI
         scoreEl.textContent = score;
         moneyEl.textContent = money;
         clickValueEl.textContent = clickValue;
         nextGoalEl.textContent = nextGoal;
 
-        createBubble(`Rebirth! +1 klik`, 'rebirth');
+        createBubble(`Rebirth! +1 click`, 'rebirth');
         document.body.style.backgroundColor = "purple";
         setTimeout(() => { document.body.style.backgroundColor = ""; }, 400);
 
