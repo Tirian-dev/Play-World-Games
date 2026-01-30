@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skytespill med Butikk</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #111;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .score {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+        }
+
+        .game-over {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 48px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .start-screen {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 36px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .controls {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        .shop {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            display: none;
+            text-align: center;
+        }
+
+        .shop button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .shop button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="score" id="score" style="display: none;">Poeng: 0</div>
+    <div class="game-over" id="gameOver" style="display: none;">Game Over</div>
+    <div class="start-screen" id="startScreen">
+        <div>Velkommen til Skytespillet!</div>
+        <div class="controls">
+            <p>Kontroller:</p>
+            <p>Venstre pil - Beveg spilleren til venstre</p>
+            <p>Høyre pil - Beveg spilleren til høyre</p>
+            <p>Venstre museknapp - Skyt</p>
+            <p>Trykk på space for å starte</p>
+            <p>Trykk på "B" for å åpne butikken</p>
+        </div>
+    </div>
+
+    <!-- Butikk -->
+    <div class="shop" id="shop">
+        <h2>Butikk</h2>
+        <p>Poeng: <span id="shopScore">0</span></p>
+        <button id="buyWeapon1">Kjøp Standard Våpen (10 poeng)</button>
+        <button id="buyWeapon2">Kjøp Maskingevær (50 poeng)</button>
+        <button id="closeShop">Lukk Butikk</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // Initialiserer canvas og kontekst
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Setter canvas-størrelse til skjermens størrelse
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Spill-objekter
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 50,
+            width: 50,
+            height: 50,
+            speed: 5,
+            color: 'green',
+            moveLeft: false,
+            moveRight: false
+        };
+
+        const bullets = [];
+        const enemies = [];
+        let score = 0; // Poengsystem
+        let gameOver = false;
+        let gameStarted = false;
+
+        let weaponType = 1; // 1 for standard, 2 for maskingevær
+        let firingRate = 500; // Standard skytefrekvens (ms)
+        let lastFireTime = 0;
+
+        // Hendelser for bevegelse og skyting
+        let keyStates = {
+            left: false,
+            right: false
+        };
+
+        // Spill-løkke
+        function gameLoop() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Rens skjermen
+
+            // Bevegelse av spilleren
+            if (keyStates.left && player.x > 0) player.x -= player.speed;
+            if (keyStates.right && player.x < canvas.width - player.width) player.x += player.speed;
+
+            // Tegner spilleren
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Oppdaterer og tegner prosjektiler
+            for (let i = 0; i < bullets.length; i++) {
+                bullets[i].y -= 10; // Flytt prosjektiler oppover
+                ctx.fillStyle = 'yellow';
+                ctx.fillRect(bullets[i].x, bullets[i].y, bullets[i].width, bullets[i].height);
+
+                // Fjern prosjektiler som har forlatt skjermen
+                if (bullets[i].y < 0) {
+                    bullets.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Genererer fiender
+            if (Math.random() < 0.02) {
+                const enemy = {
+                    x: Math.random() * (canvas.width - 50),
+                    y: 0,
+                    width: 50,
+                    height: 50,
+                    speed: 2
+                };
+                enemies.push(enemy);
+            }
+
+            // Bevegelse og tegning av fiender
+            for (let i = 0; i < enemies.length; i++) {
+                enemies[i].y += enemies[i].speed;
+                ctx.fillStyle = 'red';
+                ctx.fillRect(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
+
+                // Hvis fienden treffer spilleren
+                if (enemies[i].y + enemies[i].height > player.y &&
+                    enemies[i].x < player.x + player.width &&
+                    enemies[i].x + enemies[i].width > player.x) {
+                    gameOver = true;
+                    document.getElementById('gameOver').style.display = 'block';
+                    break;
+                }
+
+                // Fjern fiender som har forlatt skjermen
+                if (enemies[i].y > canvas.height) {
+                    enemies.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Kollidering mellom prosjektiler og fiender
+            for (let i = 0; i < bullets.length; i++) {
+                for (let j = 0; j < enemies.length; j++) {
+                    if (bullets[i].x < enemies[j].x + enemies[j].width &&
+                        bullets[i].x + bullets[i].width > enemies[j].x &&
+                        bullets[i].y < enemies[j].y + enemies[j].height &&
+                        bullets[i].y + bullets[i].height > enemies[j].y) {
+                        // Ødelegger fiende og prosjektil
+                        enemies.splice(j, 1);
+                        bullets.splice(i, 1);
+                        i--;
+                        score += 10; // Øker poengene
+                        updateScore();
+                        break;
+                    }
+                }
+            }
+
+            // Neste frame
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Hendelser for tastetrykk og museklikk
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') keyStates.left = true;
+            if (e.key === 'ArrowRight') keyStates.right = true;
+            if (e.key === 'b' && gameStarted) openShop(); // Åpne butikken
+            if (e.key === ' ' && !gameStarted) startGame(); // Start spillet med space
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') keyStates.left = false;
+            if (e.key === 'ArrowRight') keyStates.right = false;
+        });
+
+        // Funksjon for skyting ved museklikk
+        document.addEventListener('mousedown', () => {
+            shootBullet();
+        });
+
+        // Funksjon for skyting (med riktig skytefrekvens)
+        function shootBullet() {
+            const currentTime = Date.now();
+            if (currentTime - lastFireTime > firingRate) {
+                lastFireTime = currentTime;
+                const bullet = {
+                    x: player.x + player.width / 2 - 5,
+                    y: player.y,
+                    width: 10,
+                    height: 20
+                };
+                bullets.push(bullet);
+            }
+        }
+
+        // Åpne butikk
+        function openShop() {
+            document.getElementById('shop').style.display = 'block';
+            document.getElementById('shopScore').textContent = score;
+        }
+
+        // Lukk butikk
+        document.getElementById('closeShop').addEventListener('click', () => {
+            document.getElementById('shop').style.display = 'none';
+        });
+
+        // Kjøp våpen
+        document.getElementById('buyWeapon1').addEventListener('click', () => {
+            if (score >= 10) {
+                score -= 10;
+                weaponType = 1;
+                firingRate = 500; // Standard skytefrekvens (1 skudd per halv sekund)
+                updateScore();
+                closeShop();
+            }
+        });
+
+        document.getElementById('buyWeapon2').addEventListener('click', () => {
+            if (score >= 50) {
+                score -= 50;
+                weaponType = 2;
+                firingRate = 200; // Raskere skytefrekvens (3-4 skudd per sekund)
+                updateScore();
+                closeShop();
+            }
+        });
+
+        // Oppdaterer poengsummen på skjermen
+        function updateScore() {
+            document.getElementById('score').innerText = `Poeng: ${score}`;
+        }
+
+        // Start spillet når space-tasten trykkes
+        function startGame() {
+            gameStarted = true;
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('score').style.display = 'block';
+            gameLoop();
+        }
+    </script>
+</body>
+</html>
